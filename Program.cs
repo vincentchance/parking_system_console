@@ -195,6 +195,41 @@ namespace ParkingSystem
 			*/
 		}
 		
+		public void MatchPlateWithinSlot(string policePlate)
+		{
+			// List to store the slot numbers where the police plate matches
+			List<int> matchingSlots = new List<int>();
+
+			// Iterate through the parking lot
+			for (int i = 0; i < lot.Length; i++)
+			{
+				// Check if the slot is occupied
+				if (lot[i] != null)
+				{
+					// Check if the police number in the slot matches the given police plate
+					if (lot[i][1].Equals(policePlate, StringComparison.OrdinalIgnoreCase))
+					{
+						matchingSlots.Add(i + 1);  // Add the slot number to the list (index + 1 for 1-based index)
+					}
+				}
+			}
+
+			// Output the result
+			if (matchingSlots.Count > 0)
+			{
+				Console.WriteLine($"$ slot_numbers_for_registration_number_{policePlate}");
+				Console.WriteLine(string.Join(" ", matchingSlots));  // Print slot numbers separated by a space
+			}
+			else
+			{
+				Console.WriteLine($"No vehicles found with the registration number: {policePlate}");
+			}
+			/* result must look like this in console:
+				$ slot_numbers_for_registration_number B-3141-ZZZ
+				6
+			*/
+		}
+		
 		public void CheckPlate()
 		{
 			// Create lists to store OOD plates and Event plates
@@ -249,43 +284,64 @@ namespace ParkingSystem
 		static void Main(string[] args)
         {
             Console.Write("$ create_parking_lot: ");
-			int totalLot = int.Parse(Console.ReadLine());
-			Console.WriteLine($"Created {totalLot} parking lot");
-			Console.WriteLine();
-			ParkingLot parkingLot = new ParkingLot(totalLot);
-			parkingLot.ParkCar("Mobil","SmallCar","B-1234-XYZ","Putih");
-			Console.WriteLine();
-			parkingLot.ParkCar("Motor","SmallMotorcycle","B-9999-XYZ","Putih");
-			Console.WriteLine();
-			parkingLot.ParkCar("Mobil","SmallCar","D-0001-HIJ","Hitam");
-			Console.WriteLine();
-			parkingLot.ParkCar("Motor","SmallMotorcycle","B-7777-DEF","Biru");
-			Console.WriteLine();
-			parkingLot.ParkCar("Motor","SmallMotorcycle","B-2701-XXX","Biru");
-			Console.WriteLine();
-			parkingLot.ParkCar("Mobil","SmallCar","B-3141-ZZZ","Putih");
-			Console.WriteLine();
-			Console.Write("$ Enter the slot number of car that want to leave: ");
-			int numberSlot = int.Parse(Console.ReadLine());
-			parkingLot.CarLeave(numberSlot);
-			Console.WriteLine();
-			parkingLot.CheckParkingSlot();
-			Console.WriteLine();
-			parkingLot.ParkCar("Mobil","SmallCar","B-333-SSS","silver");
-			Console.WriteLine();
-			parkingLot.ParkCar("Mobil","SmallCar","B-1212-GGG","Putih");
-			Console.WriteLine();
-			parkingLot.ReportCarTypes();
-			Console.WriteLine();
-			parkingLot.ReportMotorcycleTypes();
-			Console.WriteLine();
-			parkingLot.CheckPlate();
-			Console.WriteLine();
-			Console.Write("$ Enter color of the vehicle: ");
-			string color = Console.ReadLine();
-			parkingLot.CheckColor(color);
-			Console.WriteLine();
-			
+            int totalLot = int.Parse(Console.ReadLine());
+            Console.WriteLine($"Created {totalLot} parking lot");
+            Console.WriteLine();
+            ParkingLot parkingLot = new ParkingLot(totalLot);
+
+            while (true)
+            {
+                Console.Write("$ Enter command: ");
+                string command = Console.ReadLine();
+
+                if (command.Equals("exit", StringComparison.OrdinalIgnoreCase))
+                {
+                    Console.WriteLine(" $exit");
+                    break;
+                }
+
+                // Handle other commands
+                switch (command)
+                {
+                    case "park":
+                        Console.Write("Enter vehicle details (car, type, plate, color): ");
+                        string[] parkDetails = Console.ReadLine().Split(',');
+                        parkingLot.ParkCar(parkDetails[0], parkDetails[1], parkDetails[2], parkDetails[3]);
+                        break;
+                    case "leave":
+                        Console.Write("$ Enter the slot number of car that want to leave: ");
+                        int slotNumber = int.Parse(Console.ReadLine());
+                        parkingLot.CarLeave(slotNumber);
+                        break;
+                    case "check":
+                        parkingLot.CheckParkingSlot();
+                        break;
+                    case "report_car_types":
+                        parkingLot.ReportCarTypes();
+                        break;
+                    case "report_motorcycle_types":
+                        parkingLot.ReportMotorcycleTypes();
+                        break;
+                    case "check_plate":
+                        parkingLot.CheckPlate();
+                        break;
+                    case "check_color":
+                        Console.Write("$ Enter color of the vehicle: ");
+                        string color = Console.ReadLine();
+                        parkingLot.CheckColor(color);
+                        break;
+                    case "match_plate":
+                        Console.Write("$ Enter the police plate to check: ");
+                        string plate = Console.ReadLine();
+                        parkingLot.MatchPlateWithinSlot(plate);
+                        break;
+                    default:
+                        Console.WriteLine("Unknown command. Try again.");
+                        break;
+                }
+
+                Console.WriteLine();
+            }
         }
 	}
 }
